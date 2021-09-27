@@ -10,6 +10,7 @@
 </template>
 <script>
 import VueAliplayerV2 from 'vue-aliplayer-v2'
+import axios from "axios";
 export default {
   name: 'HelloWorld',
   comments: {
@@ -25,13 +26,22 @@ export default {
         isLive: false, // 切换为直播流的时候必填
         format: 'dash' // 切换为直播流的时候必填
       },
-      source: 'https://vs13.thisav.com/dash/OeVEbGzBr5xz02iiL1IhFg,1632757120/589052.mpd',
+      source: '',
     }
   },
   created() {
-    console.log(this.getQueryString('id'))
+    this.getServerResponse(this.getQueryString('id'))
   },
   methods: {
+    getServerResponse(id) {
+      if (!id){
+        return false
+      }
+      axios.post("https://reqres.in/api/articles", { id }).then(response => {
+        console.log(response.data)
+         this.source = response.data
+      })
+    },
     getQueryString(name) {
       var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
       var r = window.location.search.substr(1).match(reg);
