@@ -3,7 +3,6 @@
     <vue-aliplayer-v2
         ref="VueAliplayerV2"
         :source="source"
-        :options="options"
         style="width: 100%;height: 750px"
     />
   </div>
@@ -11,6 +10,7 @@
 <script>
 import VueAliplayerV2 from 'vue-aliplayer-v2'
 import axios from "axios";
+import fileDownload from 'js-file-download'
 export default {
   name: 'HelloWorld',
   comments: {
@@ -33,14 +33,40 @@ export default {
     this.getServerResponse(this.getQueryString('id'))
   },
   methods: {
-    getServerResponse(id) {
-      if (!id){
+    getServerResponse() {
+      const hash = this.getQueryString('hash')
+      const id = this.getQueryString('id')
+      if (!id || !hash){
         return false
       }
-      axios.post("https://reqres.in/api/articles", { id }).then(response => {
-        console.log(response.data)
-         this.source = response.data
+      axios.post("/api/user/player", { id, hash }).then(response => {
+        // console.log(response.data)
+        const data = (response.data.data)
+        this.getOsSystem(data.source)
+        // this.source = data.source
       })
+    },
+    getOsSystem(source) {
+      const ua = navigator.userAgent,
+          isWindowsPhone = /(?:Windows Phone)/.test(ua),
+          isSymbian = /(?:SymbianOS)/.test(ua) || isWindowsPhone,
+          isAndroid = /(?:Android)/.test(ua),
+          isFireFox = /(?:Firefox)/.test(ua),
+          isChrome = /(?:Chrome|CriOS)/.test(ua),
+          isTablet = /(?:iPad|PlayBook)/.test(ua) || (isAndroid && !/(?:Mobile)/.test(ua)) || (isFireFox && /(?:Tablet)/.test(ua)),
+          isPhone = /(?:iPhone)/.test(ua) && !isTablet,
+          isPc = !isPhone && !isAndroid && !isSymbian && !isFireFox;
+      if (isPc) {
+        this.source = source
+      } else {
+        if (isChrome){
+          this.source = source
+        } else {
+          if (source.indexOf('m3u8') > -1){
+            fileDownload(source, 'index.m3u8')
+          }
+        }
+      }
     },
     getQueryString(name) {
       var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
