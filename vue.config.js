@@ -1,3 +1,7 @@
+const path = require('path')
+function resolve(dir) {
+    return path.join(__dirname, dir)
+}
 const port = process.env.port || process.env.npm_config_port || 9527 // dev port
 module.exports = {
     /**
@@ -29,5 +33,16 @@ module.exports = {
             errors: true
         }
         // before: require('./mock/mock-server.js')
+    },
+    configureWebpack: {
+        // provide the app's title in webpack's name field, so that
+        // it can be accessed in index.html to inject the correct title.
+        name: 'PLAYER',
+
+        resolve: {
+            alias: {
+                '@': resolve('src')
+            }
+        }
     }
 }

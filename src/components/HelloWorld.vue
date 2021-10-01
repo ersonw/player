@@ -1,16 +1,27 @@
 <template>
   <div class="hello">
+    <div v-for="(item, index) of bannerTop" :key="index" style="height: 150px;width: 100%;margin-top: -20px;">
+      <a :href="item.link" target="_blank">
+        <img :src="item.src" style="height: 80%;width: 80%;margin: auto;" />
+      </a>
+    </div>
+    <h1>[{{ title }}] -- telebott.com</h1>
     <vue-aliplayer-v2
         ref="VueAliplayerV2"
         :source="source"
-        style="width: 100%;height: 750px"
+        style="width: 100%;height: 650px;margin: 30px;"
     />
+    <div v-for="(item, index) of bannerFool" :key="index" style="height: 150px;width: 100%;margin-top: -20px;">
+      <a :href="item.link" target="_blank">
+        <img :src="item.src" style="height: 80%;width: 80%;margin: auto;" />
+      </a>
+    </div>
   </div>
 </template>
 <script>
 import VueAliplayerV2 from 'vue-aliplayer-v2'
 import axios from "axios";
-import fileDownload from 'js-file-download'
+// import fileDownload from 'js-file-download'
 export default {
   name: 'HelloWorld',
   comments: {
@@ -27,6 +38,9 @@ export default {
         format: 'dash' // 切换为直播流的时候必填
       },
       source: '',
+      title: '',
+      bannerTop: [],
+      bannerFool: []
     }
   },
   created() {
@@ -43,10 +57,14 @@ export default {
         // console.log(response.data)
         const data = (response.data.data)
         this.getOsSystem(data.source)
-        // this.source = data.source
+        document.title = data.title + ' P2P-Player'
+        this.title = data.title
+        this.bannerTop = data.top
+        this.bannerFool = data.fool
       })
     },
     getOsSystem(source) {
+      // let file;
       const ua = navigator.userAgent,
           isWindowsPhone = /(?:Windows Phone)/.test(ua),
           isSymbian = /(?:SymbianOS)/.test(ua) || isWindowsPhone,
@@ -56,15 +74,17 @@ export default {
           isTablet = /(?:iPad|PlayBook)/.test(ua) || (isAndroid && !/(?:Mobile)/.test(ua)) || (isFireFox && /(?:Tablet)/.test(ua)),
           isPhone = /(?:iPhone)/.test(ua) && !isTablet,
           isPc = !isPhone && !isAndroid && !isSymbian && !isFireFox;
+      if (source.indexOf('m3u8') > -1) {
+        // file = this.getQueryString('hash') + '.m3u8'
+        // fileDownload(source, file)
+      }
       if (isPc) {
         this.source = source
       } else {
         if (isChrome){
           this.source = source
         } else {
-          if (source.indexOf('m3u8') > -1){
-            fileDownload(source, 'index.m3u8')
-          }
+          window.location.href = source
         }
       }
     },
